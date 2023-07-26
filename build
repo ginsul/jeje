@@ -1,0 +1,58 @@
+pipeline {
+  agent any
+  options {
+    timestamps()
+    buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')
+  }
+
+  parameters {
+    choice(
+      choices: '1.0\n2.0\n3.0', // Add your desired image versions here
+      description: 'Select the image version',
+      name: 'IMAGE_VERSION'
+    )
+    choice(
+      choices: 'stagingV1\nstagingV2',
+      description: 'Select an option',
+      name: 'CHOICE_PARAM'
+    )
+  }
+
+  // Pipeline Syntax for Jenkins Checkout
+  stages{
+    stage('Preparation') {
+        steps {
+            script {
+                // Set the build name based on the choice parameter
+                currentBuild.displayName = "#${BUILD_NUMBER}-${params.CHOICE_PARAM}"
+                echo "Build name set to: ${currentBuild.displayName}"
+            }
+        }
+    }
+    // stage('Checkout GIT'){
+    //     steps{
+    //       checkout([$class: 'GitSCM', 
+    //         branches: [[name: '${ghprbActualCommit}']],
+    //         extensions: [
+    //             [$class: 'SparseCheckoutPaths'],                ],
+    //         userRemoteConfigs: [[url: 'https://github.com/ginsul/jeje.git']]])
+    //     }
+    // }
+    stage("Checkout SCM"){
+            steps{
+                    checkout([$class: 'GitSCM', branches: [[name: 'ginsul-jul2']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/ginsul/jeje.git']]])
+            }
+    }    
+    stage ("Build") {
+            steps {
+                sh '''
+                   ls
+                '''
+    }
+    }
+  }
+}
+
+            
+            
+            
